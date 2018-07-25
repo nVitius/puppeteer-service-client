@@ -26,24 +26,27 @@ const PSC = function (url, data = {}, options = {}) {
     });
     this.socket = socket;
 
-    const thenDo = sockId => fetch(url, {
-        method: 'POST',
-        mode: 'cors',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        ...options,
-        body: JSON.stringify({
-            sessId,
-            sockId,
-            data: ObjectStringify(data)
-        })
-    }).then(res => {
-        if (res.ok) return res.json();
-        throw new Error('Response is not ok');
-    });
-    
+    const thenDo = sockId => {
+      const mergedOptions = Object.assign({}, {
+          method: 'POST',
+          mode: 'cors',
+          credentials: 'include',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              sessId,
+              sockId,
+              data: ObjectStringify(data)
+          })
+      }, options)
+
+      return fetch(url, mergedOptions).then(res => {
+          if (res.ok) return res.json();
+          throw new Error('Response is not ok');
+      });
+    }
+
     if (socket) {
         return new Promise((resolve, reject) => {
             socket.on('connect', () => {
